@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+
+<canvas id="board">
+	
+</canvas>
+
+<script>
+	(function(window){
+
+		var canvas = document.getElementById('board');
+		var ctx = canvas.getContext('2d');
+		canvas.width = 600;
+		canvas.height = 400;
+
+
+		var GameOfLife = function(row, col, size){
+			this.board = new Array(row);
+			this.size = size;
+			this.speed = 1000 / 60;
+			this.deltaTime = 0;
+			this.step = 0;
+
+			this.rgba = [];
+			for (var i = 0; i < 255; i++) {
+				r = Math.floor(Math.random()  * 255);
+				g = Math.floor(Math.random()  * 255);
+				b = Math.floor(Math.random()  * 255);
+				this.rgba.push('rgba('+r+','+g+','+b+','+1+')');
+			}
+
+
+			for (var i = 0; i < row; i++) {
+				this.board[i] = new Array(col)
+				for (var j = 0; j < this.board[i].length; j++) {
+					this.board[i][j] = Math.round(Math.random());
+				}
+			}
+
+			this.updated = 1;
+			this.update = function(time){
+				if (this.updated == 1) {
+
+					return 
+				}
+
+				prevTime = this.deltaTime;
+				if (time - prevTime < this.speed) {
+					// console.log('out', time - prevTime + ' @ ' + this.speed)
+					return 0;
+				}
+				this.deltaTime=  time;
+
+				var board = new Array(this.board.length);
+				for (var row = 0; row < this.board.length; row++) {
+					board[row] = new Array(this.board[row].length);
+					for (var col = 0; col < this.board[row].length; col++) {
+						var live = this.test(row,col);
+						board[row][col] = live;
+					}
+				}
+				this.board = board;
+				this.updated = 1;
+				this.step = this.step +1;
+			}
+
+
+			/* check nighbores */
+			this.test = function(row, col){
+				var down = row + 1;
+				var top = row - 1;
+				var left = col - 1;
+				var right = col + 1;
+				var rowLength = this.board[row].length;
+				var colLength = this.board.length;
+				var status = this.board[row][col];
+				var count= 0;
+
+				if( top >= 0){
+					count += this.board[top][left] || 0;		
+					count += this.board[top][col] || 0;
+					count += this.board[top][right] || 0;
+				}
+				count += this.board[row][left] || 0;
+				count += this.board[row][right] || 0;
+				if (down < colLength ) {
+					count += this.board[down][left] || 0;
+					count += this.board[down][col] || 0;
+					count += this.board[down][right] || 0;
+				}
+
+				if (status) {
+					if (count ==2 || count ==3) {
+						return 1;
+					}
+					else
+					{
+						return 0;
+					}
+				}
+				else
+				{
+					if (count ==3) {
+						return 1;
+					}
+					else
+					{
+						return 0;
+					}
+				}
+			}
+
+			this.drawLine = function(startX, startY, endX, endY){
+				ctx.beginPath();
+				ctx.moveTo(startX, startY); 
+				ctx.lineTo(endX, endY); 
+				ctx.stroke();
+			}
+
+			this.gridRow = function(row, length){
+				this.drawLine(0, row * this.size, length * this.size, row * this.size);
+			}
+
+			this.gridCol = function(col, length){
+				this.drawLine(col * this.size, 0, col * this.size, length * this.size);
+			}
+
+			this.draw = function(ctx){
+				if(this.updated == 0 )
+					return false;
+
+				this.updated = 0;
+
+				ctx.clearRect(0,0,canvas.width,canvas.height);
+
+				for (var row = 0; row < this.board.length; row++) {
+					this.gridRow(row, this.board[row].length);
+					for (var col = 0; col < this.board[row].length; col++) {
+						
+						if (row == this.board.length -1)
+							this.gridCol(col, this.board.length);
+
+						if(this.board[row][col] == 1){
+							ctx.beginPath();
+							ctx.rect(this.size * col,
+							 this.size * row,
+							  this.size,
+							  this.size);
+
+							ctx.fillStyle = '#ea4c2a';
+							ctx.fill();
+							
+						}
+					}
+				}
+				this.gridRow(row, this.board[row-1].length);
+				this.gridCol(col, this.board.length);
+				ctx.font = "30px Arial";
+				ctx.fillText("step: "+ this.step++, 0 ,canvas.height - 100);
+			}
+		}
+
+		var gameOfLife = new GameOfLife(9,9, 6);
+		gameOfLife.speed = 1000 / 2;
+		gameOfLife.board = [
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		];
+
+		gameOfLife.board[5][1] = 1;
+		gameOfLife.board[5][2] = 1;
+		gameOfLife.board[6][1] = 1;
+		gameOfLife.board[6][2] = 1;
+
+		gameOfLife.board[4][35] = 1;
+		gameOfLife.board[4][36] = 1;
+		gameOfLife.board[5][35] = 1;
+		gameOfLife.board[5][36] = 1;
+		this.size = 12;
+		var gameLoop = function(time){
+			
+			gameOfLife.update(time);
+			gameOfLife.draw(ctx);
+			
+			requestAnimationFrame(gameLoop);
+		}
+		gameLoop();
+
+		// setInterval(function(){
+		// 		gameLoop();
+		// 	},60 / 1000)
+
+	})(window)
+</script>
+</body>
+</html>
