@@ -5,7 +5,7 @@
 </head>
 <body>
 
-<canvas id="board">
+<canvas id="board" style="background-color: beige;">
 	
 </canvas>
 
@@ -14,47 +14,34 @@
 
 		var canvas = document.getElementById('board');
 		var ctx = canvas.getContext('2d');
-		canvas.width = 600;
-		canvas.height = 400;
+		canvas.width = 256 *4;
+		canvas.height = 128 * 4;
 
 
 		var GameOfLife = function(row, col, size){
-			this.board = new Array(row);
+			
 			this.size = size;
-			this.speed = 1000 / 60;
-			this.deltaTime = 0;
 			this.step = 0;
+			canvas.width = col * size;
+			canvas.height = row * size;
 
-			this.rgba = [];
-			for (var i = 0; i < 255; i++) {
-				r = Math.floor(Math.random()  * 255);
-				g = Math.floor(Math.random()  * 255);
-				b = Math.floor(Math.random()  * 255);
-				this.rgba.push('rgba('+r+','+g+','+b+','+1+')');
-			}
+			this.rgba = '';
+			
+			r = Math.floor(Math.random()  * 255);
+			g = Math.floor(Math.random()  * 255);
+			b = Math.floor(Math.random()  * 255);
+			this.rgba = 'rgba('+r+','+g+','+b+','+1+')';
 
-
+			this.board = new Array(row);
 			for (var i = 0; i < row; i++) {
 				this.board[i] = new Array(col)
 				for (var j = 0; j < this.board[i].length; j++) {
-					this.board[i][j] = Math.round(Math.random());
+					this.board[i][j] = 0 ;//Math.round(Math.random());
 				}
 			}
 
 			this.updated = 1;
 			this.update = function(time){
-				if (this.updated == 1) {
-
-					return 
-				}
-
-				prevTime = this.deltaTime;
-				if (time - prevTime < this.speed) {
-					// console.log('out', time - prevTime + ' @ ' + this.speed)
-					return 0;
-				}
-				this.deltaTime=  time;
-
 				var board = new Array(this.board.length);
 				for (var row = 0; row < this.board.length; row++) {
 					board[row] = new Array(this.board[row].length);
@@ -115,6 +102,7 @@
 			}
 
 			this.drawLine = function(startX, startY, endX, endY){
+				return 0;
 				ctx.beginPath();
 				ctx.moveTo(startX, startY); 
 				ctx.lineTo(endX, endY); 
@@ -130,28 +118,18 @@
 			}
 
 			this.draw = function(ctx){
-				if(this.updated == 0 )
-					return false;
-
-				this.updated = 0;
-
-				ctx.clearRect(0,0,canvas.width,canvas.height);
-
 				for (var row = 0; row < this.board.length; row++) {
 					this.gridRow(row, this.board[row].length);
+
 					for (var col = 0; col < this.board[row].length; col++) {
-						
-						if (row == this.board.length -1)
+						if (row == this.board.length -1){
 							this.gridCol(col, this.board.length);
+						}
 
 						if(this.board[row][col] == 1){
 							ctx.beginPath();
-							ctx.rect(this.size * col,
-							 this.size * row,
-							  this.size,
-							  this.size);
-
-							ctx.fillStyle = '#ea4c2a';
+							ctx.rect(this.size * col, this.size * row, this.size, this.size);
+							ctx.fillStyle = this.rgba; //'#ea4c2a';
 							ctx.fill();
 							
 						}
@@ -159,54 +137,100 @@
 				}
 				this.gridRow(row, this.board[row-1].length);
 				this.gridCol(col, this.board.length);
-				ctx.font = "30px Arial";
-				ctx.fillText("step: "+ this.step++, 0 ,canvas.height - 100);
+				ctx.font = "12px Arial";
+				ctx.fillText("step: "+ this.step++, 0 ,canvas.height -5);
 			}
 		}
 
-		var gameOfLife = new GameOfLife(9,9, 6);
-		gameOfLife.speed = 1000 / 2;
-		gameOfLife.board = [
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		var gameOfLife = new GameOfLife(64,128, 4);
+		
+
+		var boardDraw = [
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0],
+		[0,1,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 		];
 
-		gameOfLife.board[5][1] = 1;
-		gameOfLife.board[5][2] = 1;
-		gameOfLife.board[6][1] = 1;
-		gameOfLife.board[6][2] = 1;
 
-		gameOfLife.board[4][35] = 1;
-		gameOfLife.board[4][36] = 1;
-		gameOfLife.board[5][35] = 1;
-		gameOfLife.board[5][36] = 1;
-		this.size = 12;
-		var gameLoop = function(time){
-			
-			gameOfLife.update(time);
-			gameOfLife.draw(ctx);
-			
-			requestAnimationFrame(gameLoop);
+		var gosperGliderGun = [];
+
+		for (var i = 0; i < boardDraw.length; i++) {
+			for (var j = 0; j < boardDraw[i].length; j++) {
+				if(boardDraw[i][j] == 1){
+					x = j;
+					y = i;
+					
+					// Top left gun
+					gameOfLife.board[y][x] = 1;
+					
+					// top right
+					x =  ((gameOfLife.board[i].length - 1) -j);
+					y = i;
+					gameOfLife.board[y][x] = 1;
+
+					//button left
+					x = j;
+					y = (gameOfLife.board.length - 1 - i );
+					gameOfLife.board[y][x] = 1;
+
+					// button right
+					x =  ((gameOfLife.board[i].length - 1) -j);
+					y = (gameOfLife.board.length - 1 - i );
+					gameOfLife.board[y][x] = 1;
+
+					//button left
+					x = j;
+					y = (gameOfLife.board.length - 1 - i );
+					gameOfLife.board[y][x] = 1;
+
+					// button right
+					x =  ((gameOfLife.board[i].length - 1) -j);
+					y = (gameOfLife.board.length - 1 - i );
+					gameOfLife.board[y][x] = 1;
+
+				}
+			}
 		}
-		gameLoop();
+		
+		var GameLoop = function(fps){
+			this.speed = 1000 / fps;
+			this.play = function(time){
+				requestAnimationFrame(play);
+				prevTime = this.deltaTime;
+				
+				if (time - prevTime <= this.speed) {
+					return 0;
+				}
+				this.deltaTime=  time;
 
-		// setInterval(function(){
-		// 		gameLoop();
-		// 	},60 / 1000)
+				gameOfLife.update(time);
+				ctx.clearRect(0,0,canvas.width,canvas.height);
+				gameOfLife.draw(ctx);
+			}
+
+
+			return this;
+		}
+
+		GameLoop(6).play();
 
 	})(window)
 </script>
